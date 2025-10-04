@@ -9,13 +9,16 @@
 #include "db_parser.h"
 #include "product_parser.h"
 #include "util.h"
+#include "mydatastore.h"
 
 using namespace std;
+
 struct ProdNameSorter {
     bool operator()(Product* p1, Product* p2) {
         return (p1->getName() < p2->getName());
     }
 };
+
 void displayProducts(vector<Product*>& hits);
 
 int main(int argc, char* argv[])
@@ -25,27 +28,18 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    /****************
-     * Declare your derived DataStore object here replacing
-     *  DataStore type to your derived type
-     ****************/
-    DataStore ds;
+    MyDataStore ds;
 
-
-
-    // Instantiate the individual section and product parsers we want
     ProductSectionParser* productSectionParser = new ProductSectionParser;
     productSectionParser->addProductParser(new ProductBookParser);
     productSectionParser->addProductParser(new ProductClothingParser);
     productSectionParser->addProductParser(new ProductMovieParser);
     UserSectionParser* userSectionParser = new UserSectionParser;
 
-    // Instantiate the parser
     DBParser parser;
     parser.addSectionParser("products", productSectionParser);
     parser.addSectionParser("users", userSectionParser);
 
-    // Now parse the database to populate the DataStore
     if( parser.parse(argv[1], ds) ) {
         cerr << "Error parsing!" << endl;
         return 1;
@@ -63,12 +57,14 @@ int main(int argc, char* argv[])
 
     vector<Product*> hits;
     bool done = false;
+    
     while(!done) {
         cout << "\nEnter command: " << endl;
         string line;
         getline(cin,line);
         stringstream ss(line);
         string cmd;
+        
         if((ss >> cmd)) {
             if( cmd == "AND") {
                 string term;
@@ -90,6 +86,35 @@ int main(int argc, char* argv[])
                 hits = ds.search(terms, 1);
                 displayProducts(hits);
             }
+            else if ( cmd == "ADD" ) {
+                string username;
+                int hitNum;
+                if(ss >> username >> hitNum) {
+                    if(hitNum < 1 || hitNum > (int)hits.size()) {
+                        cout << "Invalid request" << endl;
+                    } else {
+                        ds.addToCart(username, hits[hitNum-1]);
+                    }
+                } else {
+                    cout << "Invalid request" << endl;
+                }
+            }
+            else if ( cmd == "VIEWCART" ) {
+                string username;
+                if(ss >> username) {
+                    ds.viewCart(username);
+                } else {
+                    cout << "Invalid request" << endl;
+                }
+            }
+            else if ( cmd == "BUYCART" ) {
+                string username;
+                if(ss >> username) {
+                    ds.buyCart(username);
+                } else {
+                    cout << "Invalid request" << endl;
+                }
+            }
             else if ( cmd == "QUIT") {
                 string filename;
                 if(ss >> filename) {
@@ -99,17 +124,12 @@ int main(int argc, char* argv[])
                 }
                 done = true;
             }
-	    /* Add support for other commands here */
-
-
-
-
             else {
                 cout << "Unknown command" << endl;
             }
         }
-
     }
+    
     return 0;
 }
 
