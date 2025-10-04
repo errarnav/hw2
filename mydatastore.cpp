@@ -115,3 +115,7 @@ User* MyDataStore::getUser(std::string username) {
     }
     return NULL;
 }
+
+bool MyDataStore::isValidUser(std::string username) {
+    return users.find(convToLower(username)) != users.end();
+}

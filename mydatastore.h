@@ -10,6 +10,7 @@ class MyDataStore : public DataStore {
 public:
     ~MyDataStore();
     
+    bool isValidUser(std::string username);
     void addProduct(Product* p);
     void addUser(User* u);
     std::vector<Product*> search(std::vector<std::string>& terms, int type);

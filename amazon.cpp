@@ -87,18 +87,18 @@ int main(int argc, char* argv[])
                 displayProducts(hits);
             }
             else if ( cmd == "ADD" ) {
-                string username;
-                int hitNum;
-                if(ss >> username >> hitNum) {
-                    if(hitNum < 1 || hitNum > (int)hits.size()) {
-                        cout << "Invalid request" << endl;
-                    } else {
-                        ds.addToCart(username, hits[hitNum-1]);
-                    }
-                } else {
-                    cout << "Invalid request" << endl;
-                }
-            }
+    string username;
+    int hitNum;
+    if(!(ss >> username >> hitNum)) {
+        cout << "Invalid request" << endl;
+    } else if(hitNum < 1 || hitNum > (int)hits.size()) {
+        cout << "Invalid request" << endl;
+    } else if(!ds.isValidUser(username)) {
+        cout << "Invalid request" << endl;
+    } else {
+        ds.addToCart(username, hits[hitNum-1]);
+    }
+}
             else if ( cmd == "VIEWCART" ) {
                 string username;
                 if(ss >> username) {
